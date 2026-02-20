@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/services.dart';
+import 'services/history_service.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -28,6 +29,14 @@ class _ScanPageState extends State<ScanPage> {
                 _isScanning = false;
               });
               debugPrint('Barcode found! ${barcode.rawValue}');
+              
+              // Save to History
+              HistoryService.addHistoryItem(HistoryItem(
+                data: barcode.rawValue!,
+                timestamp: DateTime.now(),
+                type: HistoryType.scan,
+              ));
+
               _showResultDialog(context, barcode.rawValue!).then((_) {
                  setState(() {
                    _isScanning = true;

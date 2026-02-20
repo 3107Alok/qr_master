@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'services/history_service.dart';
 
 class GeneratePage extends StatefulWidget {
   const GeneratePage({super.key});
@@ -43,17 +45,19 @@ class _GeneratePageState extends State<GeneratePage> with SingleTickerProviderSt
         _dataToGenerate = _generateEventData();
       }
     });
+
+    if (_dataToGenerate.isNotEmpty) {
+      // Save to History
+      final item = HistoryItem(
+        data: _dataToGenerate,
+        timestamp: DateTime.now(),
+        type: HistoryType.generate,
+      );
+      HistoryService.addHistoryItem(item);
+    }
   }
 
   String _generateEventData() {
-    // Basic vCalendar/vEvent format
-    // BEGIN:VEVENT
-    // SUMMARY:Title
-    // LOCATION:Location
-    // DTSTART:20230101T120000
-    // DTEND:20230101T130000
-    // END:VEVENT
-    
     final start = _formatDateTime(_startTime);
     final end = _formatDateTime(_endTime);
     
@@ -66,7 +70,6 @@ class _GeneratePageState extends State<GeneratePage> with SingleTickerProviderSt
   }
 
   String _formatDateTime(DateTime dt) {
-    // YYYYMMDDTHHMMSS
     return "${dt.year}${dt.month.toString().padLeft(2, '0')}${dt.day.toString().padLeft(2, '0')}T"
            "${dt.hour.toString().padLeft(2, '0')}${dt.minute.toString().padLeft(2, '0')}00";
   }
@@ -121,7 +124,7 @@ class _GeneratePageState extends State<GeneratePage> with SingleTickerProviderSt
         child: Column(
           children: [
             SizedBox(
-              height: 300, // Fixed height for inputs area
+              height: 300, 
               child: TabBarView(
                 controller: _tabController,
                 children: [
@@ -169,20 +172,92 @@ class _GeneratePageState extends State<GeneratePage> with SingleTickerProviderSt
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _generate,
-              child: const Text('Generate QR'),
-            ),
-            const SizedBox(height: 20),
-            if (_dataToGenerate.isNotEmpty)
-              Center(
-                child: QrImageView(
-                  data: _dataToGenerate,
-                  version: QrVersions.auto,
-                  size: 200.0,
-                  backgroundColor: Colors.white,
-                ),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
               ),
+              child: const Text('Generate Ticket'),
+            ),
+            const SizedBox(height: 30),
+            if (_dataToGenerate.isNotEmpty)
+              _buildTicketWidget(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTicketWidget() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Icon(Icons.confirmation_number, color: Colors.deepPurple),
+              Text(
+                'TICKET',
+                style: TextStyle(
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
+              ),
+              const Icon(Icons.confirmation_number, color: Colors.deepPurple),
+            ],
+          ),
+          const SizedBox(height: 20),
+          QrImageView(
+            data: _dataToGenerate,
+            version: QrVersions.auto,
+            size: 200.0,
+            backgroundColor: Colors.white,
+          ),
+          const SizedBox(height: 20),
+
+           // Dashed line simulator
+          Row(
+            children: List.generate(150 ~/ 5, (index) => Expanded(
+              child: Container(
+                color: index % 2 == 0 ? Colors.transparent : Colors.grey[300],
+                height: 2,
+              ),
+            )),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _tabController.index == 1 
+                ? _eventTitleController.text.isNotEmpty ? _eventTitleController.text : 'Event Ticket' 
+                : 'QR Token',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (_tabController.index == 1) ...[
+            const SizedBox(height: 8),
+            Text(
+              _eventLocationController.text,
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            Text(
+              '${_startTime.hour}:${_startTime.minute} - ${_endTime.hour}:${_endTime.minute}',
+              style: TextStyle(color: Colors.deepPurple[400], fontWeight: FontWeight.bold),
+            ),
+          ],
+        ],
       ),
     );
   }
