@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "892964823914",
+    "project_id": "qr-master-8e0dd",
+    "storage_bucket": "qr-master-8e0dd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892964823914:android:744566cd32b9e8db907b13",
+        "android_client_info": {
+          "package_name": "com.example.qr_master"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYXUeeXcvMAlzjfzY6aNv2Xcng0KrzXtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
