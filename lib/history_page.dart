@@ -54,11 +54,15 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('History'),
+        title: const Text('History', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_forever),
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
             onPressed: _clearHistory,
             tooltip: 'Clear All',
           ),
@@ -72,13 +76,16 @@ class _HistoryPageState extends State<HistoryPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('No history yet', style: TextStyle(color: Colors.grey)),
+                  Icon(Icons.history_toggle_off, size: 80, color: Colors.grey.shade300),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No history found',
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 18),
+                  ),
                 ],
               ),
             );
@@ -87,42 +94,61 @@ class _HistoryPageState extends State<HistoryPage> {
           final items = snapshot.data!;
 
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
               final isScan = item.type == HistoryType.scan;
-              final dateFormat = DateFormat('MMM d, y HH:mm');
+              final dateFormat = DateFormat('MMM d, h:mm a');
 
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      spreadRadius: 2,
+                      blurRadius: 10,
+                    )
+                  ],
                 ),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isScan ? Colors.blue.withOpacity(0.1) : Colors.purple.withOpacity(0.1),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isScan ? Colors.blueAccent.withOpacity(0.1) : Colors.orangeAccent.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
                     child: Icon(
                       isScan ? Icons.qr_code_scanner : Icons.qr_code,
-                      color: isScan ? Colors.blue : Colors.purple,
+                      color: isScan ? Colors.blueAccent : Colors.orangeAccent,
+                      size: 20,
                     ),
                   ),
                   title: Text(
                     item.data,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  subtitle: Text(
-                    dateFormat.format(item.timestamp),
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      dateFormat.format(item.timestamp),
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.copy, size: 20),
+                    icon: Icon(Icons.copy, size: 18, color: Colors.grey[400]),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: item.data));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Copied to clipboard'),
+                          behavior: SnackBarBehavior.floating,
                           duration: Duration(seconds: 1),
                         ),
                       );
